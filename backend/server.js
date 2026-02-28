@@ -69,7 +69,7 @@ app.post("/contact", (req, res) => {
 
     res.json({
       success: true,
-      msg: "Message saved successfully!"
+      msg: "Message sent successfully!"
     });
   });
 });
