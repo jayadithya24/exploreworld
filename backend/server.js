@@ -1,36 +1,43 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const mysql = require("mysql2");
 
 const app = express();
 
 // Middlewares
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json()); // bodyParser not needed
 
-// MySQL Connection
-const db = mysql.createConnection({
+// ===========================
+// MySQL Connection Pool (Better for Render)
+// ===========================
+const db = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-db.connect(err => {
+// Test DB connection
+db.getConnection((err, connection) => {
   if (err) {
-    console.error("MySQL connection failed:", err);
+    console.error("❌ MySQL connection failed:", err.message);
   } else {
-    console.log("MySQL Connected Successfully!");
+    console.log("✅ MySQL Connected Successfully!");
+    connection.release();
   }
 });
 
+// ===========================
 // Test Route
+// ===========================
 app.get("/", (req, res) => {
-  res.send("Backend + MySQL connected successfully!");
+  res.send("Backend is running successfully 🚀");
 });
-
 
 // ===========================
 // CONTACT FORM API
@@ -39,37 +46,55 @@ app.post("/contact", (req, res) => {
   const { name, email, message } = req.body;
 
   if (!name || !email || !message) {
-    return res.status(400).json({ success: false, msg: "All fields are required!" });
+    return res.status(400).json({
+      success: false,
+      msg: "All fields are required!"
+    });
   }
 
-  const sql = "INSERT INTO contact_messages (name, email, message) VALUES (?, ?, ?)";
-  db.query(sql, [name, email, message], (err, result) => {
+  const sql = `
+    INSERT INTO contact_messages (name, email, message)
+    VALUES (?, ?, ?)
+  `;
+
+  db.query(sql, [name, email, message], (err) => {
     if (err) {
-      console.error("Insert Error:", err);
-      return res.status(500).json({ success: false, msg: "Database Error" });
+      console.error("Insert Error:", err.message);
+      return res.status(500).json({
+        success: false,
+        msg: "Database Error"
+      });
     }
-    res.json({ success: true, msg: "Message saved successfully!" });
+
+    res.json({
+      success: true,
+      msg: "Message saved successfully!"
+    });
   });
 });
-
 
 // ===========================
 // DESTINATIONS API
 // ===========================
 
-// 1️⃣ Get all destinations
+// Get all destinations
 app.get("/destinations", (req, res) => {
   const sql = "SELECT * FROM destinations ORDER BY id DESC";
+
   db.query(sql, (err, results) => {
     if (err) {
-      console.error("Database Read Error:", err);
-      return res.status(500).json({ success: false, msg: "Error fetching destinations" });
+      console.error("Database Read Error:", err.message);
+      return res.status(500).json({
+        success: false,
+        msg: "Error fetching destinations"
+      });
     }
+
     res.json(results);
   });
 });
 
-// 2️⃣ Insert new destination (backend only, for admin/testing)
+// Add new destination
 app.post("/destinations", (req, res) => {
   const { name, country, description, image_url } = req.body;
 
@@ -85,16 +110,21 @@ app.post("/destinations", (req, res) => {
     VALUES (?, ?, ?, ?)
   `;
 
-  db.query(sql, [name, country, description, image_url], (err, result) => {
+  db.query(sql, [name, country || null, description, image_url], (err) => {
     if (err) {
-      console.error("Insert Destination Error:", err);
-      return res.status(500).json({ success: false, msg: "Database Error" });
+      console.error("Insert Destination Error:", err.message);
+      return res.status(500).json({
+        success: false,
+        msg: "Database Error"
+      });
     }
 
-    res.json({ success: true, msg: "Destination added successfully!" });
+    res.json({
+      success: true,
+      msg: "Destination added successfully!"
+    });
   });
 });
-
 
 // ===========================
 // START SERVER
@@ -102,5 +132,5 @@ app.post("/destinations", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
