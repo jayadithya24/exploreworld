@@ -24,7 +24,7 @@ function sendMessage(event) {
   })
     .then(res => res.json())
     .then(data => {
-      showToast("✅ " + data.msg);
+      showToast("✅ Your message has been sent successfully!");
       document.getElementById("contactForm").reset();
     })
     .catch(() => {
