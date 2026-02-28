@@ -1,18 +1,21 @@
-// Handle contact form submission
+const API_BASE = "https://exploreworld-nj6x.onrender.com";
+
+// ===============================
+// CONTACT FORM
+// ===============================
 function sendMessage(event) {
-  event.preventDefault(); // Prevent page refresh
+  event.preventDefault();
 
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
   const message = document.getElementById("message").value.trim();
 
   if (!name || !email || !message) {
-    showErrorPopup("Please fill all fields!");
+    showToast("❌ Please fill all fields");
     return;
   }
 
-  // Send POST request to backend
-  fetch("http://localhost:5000/contact", {
+  fetch(`${API_BASE}/contact`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -21,64 +24,68 @@ function sendMessage(event) {
   })
     .then(res => res.json())
     .then(data => {
-      showSuccessPopup(data.msg);  // Show success popup
+      showToast("✅ " + data.msg);
       document.getElementById("contactForm").reset();
     })
-    .catch(error => {
-      console.error("Error:", error);
-      showErrorPopup("Something went wrong. Please try again.");
+    .catch(() => {
+      showToast("❌ Server waking up. Try again in 20 seconds");
     });
 }
 
-function showSuccessPopup(message) {
-  const popup = document.getElementById("successPopup");
-  popup.querySelector("p").innerText = message;
-  popup.style.display = "flex";
+// ===============================
+// TOAST
+// ===============================
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  const toastMessage = document.getElementById("toastMessage");
+
+  if (!toast || !toastMessage) return;
+
+  toastMessage.innerText = message;
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 3000);
 }
 
-function showErrorPopup(message) {
-  const popup = document.getElementById("errorPopup");
-  popup.querySelector("p").innerText = message;
-  popup.style.display = "flex";
-}
-
-function closePopup(id) {
-  document.getElementById(id).style.display = "none";
-}
-
-// Load destinations dynamically from backend
+// ===============================
+// LOAD DESTINATIONS
+// ===============================
 function loadDestinations() {
-  fetch("http://localhost:5000/destinations")
+  const container = document.getElementById("destinationsContainer");
+  if (!container) return;
+
+  container.innerHTML = "<p>Loading destinations...</p>";
+
+  fetch(`${API_BASE}/destinations`)
     .then(res => res.json())
     .then(data => {
-      const container = document.getElementById("destinationsContainer");
-      container.innerHTML = ""; // Clear loading text
+      container.innerHTML = "";
 
-      if (data.length === 0) {
-        container.innerHTML = "<p>No destinations available.</p>";
+      if (!data || data.length === 0) {
+        container.innerHTML = "<p>No destinations found</p>";
         return;
       }
 
       data.forEach(place => {
         container.innerHTML += `
-          <div class="destination-item">
-            <img src="${place.image_url}" alt="${place.name}" />
-            <div>
-              <h2>${place.name}</h2>
+          <div class="destination-card">
+            <img src="${place.image_url}" alt="${place.name}">
+            <div class="card-content">
+              <h3>${place.name}</h3>
               <p>${place.description}</p>
             </div>
           </div>
         `;
       });
     })
-    .catch(err => {
-      console.error("Error loading destinations:", err);
-      document.getElementById("destinationsContainer").innerHTML =
-        "<p style='color:red;'>Failed to load destinations.</p>";
+    .catch(() => {
+      container.innerHTML = "<p style='color:red;'>Server is waking up. Please refresh in 20 seconds.</p>";
     });
 }
 
-// Load only on destinations page
-if (window.location.pathname.includes("destinations.html")) {
+// Run only on destinations page
+if (window.location.pathname.includes("destinations")) {
   loadDestinations();
 }

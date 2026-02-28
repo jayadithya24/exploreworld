@@ -1,60 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ExploreWorld - Contact</title>
-  <link rel="stylesheet" href="styles.css" />
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>ExploreWorld - Contact</title>
+
+<link rel="stylesheet" href="styles.css">
+
 </head>
+
 <body>
-  <header>
-    <div class="logo">ExploreWorld</div>
-    <nav>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="destinations.html">Destinations</a></li>
-        <li><a href="contact.html" class="active">Contact</a></li>
-      </ul>
-    </nav>
-  </header>
 
-  <main>
-    <section class="hero hero-small" style="background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1400&q=80');">
-      <h1>Contact Us</h1>
-      <p>We're here to help you plan your next adventure.</p>
-    </section>
 
-    <section class="container contact-form">
-      <!-- IMPORTANT: added onsubmit="sendMessage(event)" -->
-      <form id="contactForm" onsubmit="sendMessage(event)">
-        
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required />
+<header>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required />
+<div class="logo">ExploreWorld</div>
 
-        <label for="message">Message:</label>
-        <textarea id="message" name="message" rows="5" required></textarea>
+<nav>
 
-        <button type="submit">Send</button>
-      </form>
-    </section>
-  </main>
+<ul>
 
-  <footer>
-    <p>&copy; 2024 ExploreWorld</p>
-  </footer>
+<li><a href="index.html">Home</a></li>
 
-  <script src="script.js"></script>
- <div id="successPopup" class="popup">
-  <div class="popup-content">
-    <h2>Message Sent!</h2>
-    <p>Your message has been delivered successfully.</p>
-    <button onclick="closePopup('successPopup')">OK</button>
-  </div>
+<li><a href="destinations.html">Destinations</a></li>
+
+<li><a href="contact.html" class="active">Contact</a></li>
+
+</ul>
+
+</nav>
+
+</header>
+
+
+
+<main>
+
+
+<section class="hero hero-small"
+
+style="background-image:url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1400&q=80');">
+
+<h1>Contact Us</h1>
+
+<p>We're here to help you plan your next adventure.</p>
+
+</section>
+
+
+
+<section class="container contact-form">
+
+
+<form id="contactForm" onsubmit="sendMessage(event)">
+
+
+<label>Name:</label>
+
+<input type="text" id="name" required>
+
+
+
+<label>Email:</label>
+
+<input type="email" id="email" required>
+
+
+
+<label>Message:</label>
+
+<textarea id="message" rows="5" required></textarea>
+
+
+
+<button type="submit">Send</button>
+
+
+</form>
+
+
+</section>
+
+
+</main>
+
+
+
+<footer>
+
+<p>&copy; 2024 ExploreWorld</p>
+
+</footer>
+
+
+
+<!-- Toast Notification -->
+<div id="toast" class="toast">
+
+<div class="toast-icon">✔</div>
+
+<div id="toastMessage" class="toast-message">
+
+Message saved successfully
+
+</div>
+
 </div>
 
 
+
+<script src="script.js"></script>
+
+
 </body>
+
 </html>

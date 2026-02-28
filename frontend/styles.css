@@ -1,3 +1,12 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
 /* Box sizing reset */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -469,4 +478,305 @@ footer p {
 /* Title hover color */
 .grid-item:hover p {
   color: #ff5722;
+}
+/* POPUP OVERLAY */
+
+.popup-overlay {
+
+  position: fixed;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  background: rgba(0,0,0,0.6);
+
+  display: none;
+
+  justify-content: center;
+
+  align-items: center;
+
+  z-index: 9999;
+
+}
+
+
+
+/* POPUP CARD */
+
+.popup-card {
+
+  background: white;
+
+  padding: 30px 40px;
+
+  border-radius: 12px;
+
+  text-align: center;
+
+  width: 320px;
+
+  animation: popupAnimation 0.3s ease;
+
+}
+
+
+
+/* ICON */
+
+.popup-icon {
+
+  font-size: 40px;
+
+  color: green;
+
+  margin-bottom: 10px;
+
+}
+
+
+
+/* TITLE */
+
+.popup-card h2 {
+
+  margin-bottom: 10px;
+
+}
+
+
+
+/* TEXT */
+
+.popup-card p {
+
+  margin-bottom: 20px;
+
+  color: #555;
+
+}
+
+
+
+/* BUTTON */
+
+.popup-btn {
+
+  padding: 10px 25px;
+
+  border: none;
+
+  background: #007bff;
+
+  color: white;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  font-size: 16px;
+
+}
+
+
+
+.popup-btn:hover {
+
+  background: #0056b3;
+
+}
+
+
+
+/* ANIMATION */
+
+@keyframes popupAnimation {
+
+  from {
+
+    transform: scale(0.7);
+
+    opacity: 0;
+
+  }
+
+  to {
+
+    transform: scale(1);
+
+    opacity: 1;
+
+  }
+
+}
+
+
+@keyframes slideUp{
+from{
+opacity:0;
+transform:translateX(400px);
+}
+to{
+opacity:1;
+transform:translateX(0);
+}
+}
+/* SMALL BOTTOM RIGHT TOAST */
+
+/* ===========================
+   FINAL SMALL BOTTOM RIGHT TOAST
+   =========================== */
+
+.toast{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#ffffff;
+color:#333;
+padding:10px 16px;
+border-radius:8px;
+box-shadow:0 4px 12px rgba(0,0,0,0.15);
+display:flex;
+align-items:center;
+gap:8px;
+min-width:180px;
+max-width:260px;
+font-size:14px;
+font-weight:500;
+transform:translateX(350px);
+transition:0.35s ease;
+z-index:9999;
+}
+
+.toast.show{
+transform:translateX(0);
+}
+
+.toast-icon{
+color:#22c55e;
+font-size:16px;
+}
+
+.toast-message{
+flex:1;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  flex-wrap: wrap;
+}
+
+nav ul {
+  display: flex;
+  list-style: none;
+  gap: 15px;
+  padding: 0;
+  margin: 0;
+}
+@media (max-width: 768px) {
+  nav ul {
+    flex-direction: column;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  nav ul li {
+    text-align: center;
+    padding: 8px 0;
+  }
+}
+.hero {
+  text-align: center;
+  padding: 80px 20px;
+  background-size: cover;
+  background-position: center;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 60px 15px;
+  }
+
+  .hero h1 {
+    font-size: 28px;
+  }
+
+  .hero p {
+    font-size: 16px;
+  }
+
+  .hero-btn {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+}
+.destinations-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.destination-item {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.destination-item img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+@media (max-width: 768px) {
+  .destinations-list {
+    grid-template-columns: 1fr;
+  }
+}
+.contact-form {
+  max-width: 600px;
+  margin: 30px auto;
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .contact-form {
+    margin: 20px;
+  }
+
+  .contact-form input,
+  .contact-form textarea {
+    width: 100%;
+  }
+}
+.destination-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.destination-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.card-content {
+  padding: 15px;
+}
+
+@media (max-width: 768px) {
+  .destination-card img {
+    height: 180px;
+  }
 }
