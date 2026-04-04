@@ -1,4 +1,167 @@
 const API_BASE = "https://exploreworld-nj6x.onrender.com";
+const AUTH_STORAGE_KEY = "exploreworldLoggedIn";
+const DESTINATIONS_CACHE_KEY = "exploreworldDestinationsCache";
+
+const FALLBACK_DESTINATIONS = [
+  {
+    name: "Paris",
+    image_url: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=80",
+    description: "Iconic city views, cafes, art, and timeless travel moments."
+  },
+  {
+    name: "Bali",
+    image_url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=900&q=80",
+    description: "A tropical escape with beaches, temples, and lush scenery."
+  },
+  {
+    name: "New York",
+    image_url: "https://images.unsplash.com/photo-1549924231-f129b911e442?auto=format&fit=crop&w=900&q=80",
+    description: "A fast-paced city full of landmarks, food, and nightlife."
+  },
+  {
+    name: "Tokyo",
+    image_url: "https://images.unsplash.com/photo-1549692520-acc6669e2f0c?auto=format&fit=crop&w=900&q=80",
+    description: "Modern energy, neon streets, and unforgettable culture."
+  },
+  {
+    name: "London",
+    image_url: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=900&q=80",
+    description: "Classic landmarks, river views, and a lively city atmosphere."
+  },
+  {
+    name: "Dubai",
+    image_url: "https://images.unsplash.com/photo-1488747279002-c8523379faaa?auto=format&fit=crop&w=900&q=80",
+    description: "Luxury shopping, desert adventures, and skyline views."
+  },
+  {
+    name: "Rome",
+    image_url: "https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=900&q=80",
+    description: "Ancient history, beautiful piazzas, and classic Italian charm."
+  },
+  {
+    name: "Singapore",
+    image_url: "https://images.unsplash.com/photo-1482192596544-9eb780fc7f66?auto=format&fit=crop&w=900&q=80",
+    description: "Clean streets, gardens, food courts, and futuristic city design."
+  },
+  {
+    name: "Sydney",
+    image_url: "https://images.unsplash.com/photo-1504214208698-ea1916a2195a?auto=format&fit=crop&w=900&q=80",
+    description: "Harbor views, beaches, and a relaxed coastal city vibe."
+  },
+  {
+    name: "Bangkok",
+    image_url: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=900&q=80",
+    description: "Street food, temples, markets, and vibrant city life."
+  },
+  {
+    name: "Amsterdam",
+    image_url: "https://images.unsplash.com/photo-1449034446853-66c86144b0ad?auto=format&fit=crop&w=900&q=80",
+    description: "Canals, bikes, museums, and a charming city atmosphere."
+  },
+  {
+    name: "Seoul",
+    image_url: "https://images.unsplash.com/photo-1549144511-f099e773c147?auto=format&fit=crop&w=900&q=80",
+    description: "Modern neighborhoods, food culture, and colorful nightlife."
+  }
+];
+
+function getCurrentPage() {
+  const page = window.location.pathname.split("/").pop();
+  return page ? page.toLowerCase() : "index.html";
+}
+
+function isLoggedIn() {
+  return localStorage.getItem(AUTH_STORAGE_KEY) === "true";
+}
+
+function setLoggedIn(value) {
+  localStorage.setItem(AUTH_STORAGE_KEY, value ? "true" : "false");
+}
+
+function enforceAuthRouting() {
+  const page = getCurrentPage();
+  const authPages = ["login.html", "register.html"];
+  const publicPages = ["login.html", "register.html"];
+  const protectedPages = [
+    "index.html",
+    "destinations.html",
+    "contact.html",
+    "about.html",
+    "packages.html",
+    "gallery.html"
+  ];
+
+  if (!isLoggedIn() && protectedPages.includes(page)) {
+    window.location.replace("login.html");
+    return;
+  }
+
+  if (isLoggedIn() && authPages.includes(page)) {
+    window.location.replace("index.html");
+  }
+}
+
+function setupLoginForm() {
+  const form = document.getElementById("loginForm");
+  if (!form) return;
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const email = document.getElementById("loginEmail")?.value.trim();
+    const password = document.getElementById("loginPassword")?.value.trim();
+
+    if (!email || !password) {
+      alert("Please enter your email and password.");
+      return;
+    }
+
+    setLoggedIn(true);
+    window.location.replace("index.html");
+  });
+}
+
+function setupRegisterForm() {
+  const form = document.getElementById("registerForm");
+  if (!form) return;
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const password = document.getElementById("registerPassword")?.value;
+    const confirmPassword = document.getElementById("confirmPassword")?.value;
+
+    if (!password || !confirmPassword) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      alert("Password and confirm password must match.");
+      return;
+    }
+
+    setLoggedIn(true);
+    window.location.replace("index.html");
+  });
+}
+
+function setupLogoutButtons() {
+  const logoutButtons = document.querySelectorAll("[data-logout-button]");
+  if (!logoutButtons.length) return;
+
+  logoutButtons.forEach(function (button) {
+    button.addEventListener("click", function () {
+      setLoggedIn(false);
+      window.location.replace("login.html");
+    });
+  });
+}
+
+enforceAuthRouting();
+setupLoginForm();
+setupRegisterForm();
+setupLogoutButtons();
 
 // ===============================
 // CONTACT FORM
@@ -49,6 +212,39 @@ function showToast(message) {
   }, 3000);
 }
 
+function renderDestinationCards(container, destinations) {
+  container.innerHTML = "";
+
+  destinations.forEach(function (place) {
+    container.innerHTML += `
+      <div class="destination-card">
+        <img src="${place.image_url}" alt="${place.name}">
+        <div class="card-content">
+          <h3>${place.name}</h3>
+          <p>${place.description}</p>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function mergeDestinationLists(primaryList, secondaryList) {
+  const mergedMap = new Map();
+
+  primaryList.forEach(function (item) {
+    mergedMap.set(item.name.toLowerCase(), item);
+  });
+
+  secondaryList.forEach(function (item) {
+    const key = item.name.toLowerCase();
+    if (!mergedMap.has(key)) {
+      mergedMap.set(key, item);
+    }
+  });
+
+  return Array.from(mergedMap.values());
+}
+
 // ===============================
 // LOAD DESTINATIONS
 // ===============================
@@ -56,32 +252,49 @@ function loadDestinations() {
   const container = document.getElementById("destinationsContainer");
   if (!container) return;
 
-  container.innerHTML = "<p>Loading destinations...</p>";
+  const cachedDestinations = localStorage.getItem(DESTINATIONS_CACHE_KEY);
 
-  fetch(`${API_BASE}/destinations`)
+  if (cachedDestinations) {
+    try {
+      const parsedCache = JSON.parse(cachedDestinations);
+      if (Array.isArray(parsedCache) && parsedCache.length > 0) {
+        renderDestinationCards(container, mergeDestinationLists(parsedCache, FALLBACK_DESTINATIONS));
+      }
+    } catch (error) {
+      localStorage.removeItem(DESTINATIONS_CACHE_KEY);
+    }
+  }
+
+  if (!container.children.length) {
+    renderDestinationCards(container, FALLBACK_DESTINATIONS);
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(function () {
+    controller.abort();
+  }, 4000);
+
+  fetch(`${API_BASE}/destinations`, { signal: controller.signal })
     .then(res => res.json())
     .then(data => {
-      container.innerHTML = "";
-
       if (!data || data.length === 0) {
-        container.innerHTML = "<p>No destinations found</p>";
+        if (!container.children.length) {
+          renderDestinationCards(container, FALLBACK_DESTINATIONS);
+        }
         return;
       }
 
-      data.forEach(place => {
-        container.innerHTML += `
-          <div class="destination-card">
-            <img src="${place.image_url}" alt="${place.name}">
-            <div class="card-content">
-              <h3>${place.name}</h3>
-              <p>${place.description}</p>
-            </div>
-          </div>
-        `;
-      });
+      const combinedDestinations = mergeDestinationLists(data, FALLBACK_DESTINATIONS);
+      localStorage.setItem(DESTINATIONS_CACHE_KEY, JSON.stringify(combinedDestinations));
+      renderDestinationCards(container, combinedDestinations);
     })
     .catch(() => {
-      container.innerHTML = "<p style='color:red;'>Server is waking up. Please refresh in 20 seconds.</p>";
+      if (!container.children.length) {
+        renderDestinationCards(container, FALLBACK_DESTINATIONS);
+      }
+    })
+    .finally(() => {
+      clearTimeout(timeoutId);
     });
 }
 

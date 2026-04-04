@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ExploreWorld - Register</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="auth-page">
+  <header>
+    <div class="logo">ExploreWorld</div>
+  </header>
+
+  <main class="auth-main">
+    <section class="auth-layout">
+      <article class="auth-showcase">
+        <h1>Create Your Travel Account</h1>
+        <p>Join ExploreWorld to unlock handpicked experiences, smart trip planning tools, and exclusive travel deals.</p>
+        <ul class="auth-benefits">
+          <li>Build and organize multi-city adventures</li>
+          <li>Save your favorite hotels and attractions</li>
+          <li>Receive alerts for special seasonal discounts</li>
+        </ul>
+      </article>
+
+      <article class="auth-card">
+        <h2>Register</h2>
+        <p class="auth-subtitle">Set up your profile in less than a minute.</p>
+
+        <form id="registerForm" class="auth-form" action="#" method="post">
+          <div>
+            <label for="registerName">Full Name</label>
+            <input type="text" id="registerName" name="name" placeholder="Your full name" required />
+          </div>
+
+          <div>
+            <label for="registerEmail">Email Address</label>
+            <input type="email" id="registerEmail" name="email" placeholder="you@example.com" required />
+          </div>
+
+          <div>
+            <label for="registerPassword">Password</label>
+            <input type="password" id="registerPassword" name="password" placeholder="Create a password" required />
+          </div>
+
+          <div>
+            <label for="confirmPassword">Confirm Password</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-enter your password" required />
+          </div>
+
+          <button type="submit" class="auth-button">Create Account</button>
+        </form>
+
+        <p class="auth-meta">Already have an account? <a href="login.html">Sign in</a></p>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 ExploreWorld. All rights reserved.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

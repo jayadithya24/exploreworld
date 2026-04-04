@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ExploreWorld - Login</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="auth-page">
+  <header>
+    <div class="logo">ExploreWorld</div>
+  </header>
+
+  <main class="auth-main">
+    <section class="auth-layout">
+      <article class="auth-showcase">
+        <h1>Welcome Back, Traveler</h1>
+        <p>Sign in to continue building your dream itinerary, save favorite destinations, and receive personalized offers.</p>
+        <ul class="auth-benefits">
+          <li>Access your trip wishlist from any device</li>
+          <li>Get curated destination recommendations</li>
+          <li>Track bookings and upcoming travel plans</li>
+        </ul>
+      </article>
+
+      <article class="auth-card">
+        <h2>Login</h2>
+        <p class="auth-subtitle">Enter your account details to continue.</p>
+
+        <form id="loginForm" class="auth-form" action="#" method="post">
+          <div>
+            <label for="loginEmail">Email Address</label>
+            <input type="email" id="loginEmail" name="email" placeholder="you@example.com" required />
+          </div>
+
+          <div>
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" name="password" placeholder="Enter your password" required />
+          </div>
+
+          <button type="submit" class="auth-button">Sign In</button>
+        </form>
+
+        <p class="auth-meta">No account yet? <a href="register.html">Create one</a></p>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 ExploreWorld. All rights reserved.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
