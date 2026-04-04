@@ -60,7 +60,7 @@ const FALLBACK_DESTINATIONS = [
   },
   {
     name: "Seoul",
-    image_url: "https://images.unsplash.com/photo-1549144511-f099e773c147?auto=format&fit=crop&w=900&q=80",
+    image_url: "https://images.unsplash.com/photo-1528127269029-c440edc5a5e7?auto=format&fit=crop&w=900&q=80",
     description: "Modern neighborhoods, food culture, and colorful nightlife."
   }
 ];
