@@ -6,6 +6,11 @@ const crypto = require("crypto");
 
 const app = express();
 
+const isVercelRuntime = Boolean(process.env.VERCEL);
+const shouldUseSsl = process.env.DB_SSL
+  ? process.env.DB_SSL === "true"
+  : isVercelRuntime;
+
 // Middlewares
 app.use(cors());
 app.use(express.json()); // bodyParser not needed
@@ -19,7 +24,7 @@ const db = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : undefined,
+  ssl: shouldUseSsl ? { rejectUnauthorized: false } : undefined,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -109,7 +114,8 @@ app.post(["/auth/register", "/api/auth/register"], (req, res) => {
       console.error("Register read error:", checkErr.message);
       return res.status(500).json({
         success: false,
-        msg: "Database Error"
+        msg: "Database Error",
+        code: checkErr.code || "UNKNOWN"
       });
     }
 
@@ -128,7 +134,8 @@ app.post(["/auth/register", "/api/auth/register"], (req, res) => {
         console.error("Register insert error:", insertErr.message);
         return res.status(500).json({
           success: false,
-          msg: "Database Error"
+          msg: "Database Error",
+          code: insertErr.code || "UNKNOWN"
         });
       }
 
@@ -160,7 +167,8 @@ app.post(["/auth/login", "/api/auth/login"], (req, res) => {
         console.error("Login read error:", err.message);
         return res.status(500).json({
           success: false,
-          msg: "Database Error"
+          msg: "Database Error",
+          code: err.code || "UNKNOWN"
         });
       }
 
