@@ -6,10 +6,7 @@ const crypto = require("crypto");
 
 const app = express();
 
-const isVercelRuntime = Boolean(process.env.VERCEL);
-const shouldUseSsl = process.env.DB_SSL
-  ? process.env.DB_SSL === "true"
-  : isVercelRuntime;
+const shouldUseSsl = process.env.DB_SSL === "true";
 
 // Middlewares
 app.use(cors());
@@ -25,6 +22,9 @@ const db = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   ssl: shouldUseSsl ? { rejectUnauthorized: false } : undefined,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0,
+  connectTimeout: 10000,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
