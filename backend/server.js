@@ -15,20 +15,44 @@ app.use(express.json()); // bodyParser not needed
 // ===========================
 // MySQL Connection Pool (Better for Render)
 // ===========================
-const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT || 3306),
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  ssl: shouldUseSsl ? { rejectUnauthorized: false } : undefined,
-  enableKeepAlive: true,
-  keepAliveInitialDelay: 0,
-  connectTimeout: 10000,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+function createDbPool() {
+  return mysql.createPool({
+    host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT || 3306),
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    ssl: shouldUseSsl ? { rejectUnauthorized: false } : undefined,
+    enableKeepAlive: true,
+    keepAliveInitialDelay: 0,
+    connectTimeout: 10000,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  });
+}
+
+let db = createDbPool();
+
+function recreateDbPool() {
+  try {
+    db.end(() => {});
+  } catch (error) {
+    // Ignore close errors while replacing broken pool.
+  }
+  db = createDbPool();
+}
+
+function queryWithReconnect(sql, params, callback, hasRetried = false) {
+  db.query(sql, params, (err, results) => {
+    if (err && err.code === "PROTOCOL_CONNECTION_LOST" && !hasRetried) {
+      recreateDbPool();
+      return queryWithReconnect(sql, params, callback, true);
+    }
+
+    return callback(err, results);
+  });
+}
 
 // Test DB connection
 db.getConnection((err, connection) => {
@@ -41,7 +65,7 @@ db.getConnection((err, connection) => {
 });
 
 // Ensure users table exists for auth features.
-db.query(
+queryWithReconnect(
   `
     CREATE TABLE IF NOT EXISTS users (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -51,6 +75,7 @@ db.query(
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `,
+  [],
   (err) => {
     if (err) {
       console.error("Users table creation error:", err.message);
@@ -109,7 +134,7 @@ app.post(["/auth/register", "/api/auth/register"], (req, res) => {
 
   const emailLower = email.trim().toLowerCase();
 
-  db.query("SELECT id FROM users WHERE email = ?", [emailLower], (checkErr, users) => {
+  queryWithReconnect("SELECT id FROM users WHERE email = ?", [emailLower], (checkErr, users) => {
     if (checkErr) {
       console.error("Register read error:", checkErr.message);
       return res.status(500).json({
@@ -129,7 +154,7 @@ app.post(["/auth/register", "/api/auth/register"], (req, res) => {
     const passwordHash = hashPassword(password);
     const sql = "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)";
 
-    db.query(sql, [name.trim(), emailLower, passwordHash], (insertErr) => {
+    queryWithReconnect(sql, [name.trim(), emailLower, passwordHash], (insertErr) => {
       if (insertErr) {
         console.error("Register insert error:", insertErr.message);
         return res.status(500).json({
@@ -159,7 +184,7 @@ app.post(["/auth/login", "/api/auth/login"], (req, res) => {
 
   const emailLower = email.trim().toLowerCase();
 
-  db.query(
+  queryWithReconnect(
     "SELECT id, name, email, password_hash FROM users WHERE email = ? LIMIT 1",
     [emailLower],
     (err, users) => {
@@ -220,7 +245,7 @@ app.post(["/contact", "/api/contact"], (req, res) => {
     VALUES (?, ?, ?)
   `;
 
-  db.query(sql, [name, email, message], (err) => {
+  queryWithReconnect(sql, [name, email, message], (err) => {
     if (err) {
       console.error("Insert Error:", err.message);
       return res.status(500).json({
@@ -244,7 +269,7 @@ app.post(["/contact", "/api/contact"], (req, res) => {
 app.get(["/destinations", "/api/destinations"], (req, res) => {
   const sql = "SELECT * FROM destinations ORDER BY id DESC";
 
-  db.query(sql, (err, results) => {
+  queryWithReconnect(sql, [], (err, results) => {
     if (err) {
       console.error("Database Read Error:", err.message);
       return res.status(500).json({
@@ -273,7 +298,7 @@ app.post(["/destinations", "/api/destinations"], (req, res) => {
     VALUES (?, ?, ?, ?)
   `;
 
-  db.query(sql, [name, country || null, description, image_url], (err) => {
+  queryWithReconnect(sql, [name, country || null, description, image_url], (err) => {
     if (err) {
       console.error("Insert Destination Error:", err.message);
       return res.status(500).json({
