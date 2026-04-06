@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const mysql = require("mysql2");
+const crypto = require("crypto");
 
 const app = express();
 
@@ -33,11 +34,163 @@ db.getConnection((err, connection) => {
   }
 });
 
+// Ensure users table exists for auth features.
+db.query(
+  `
+    CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      email VARCHAR(255) NOT NULL UNIQUE,
+      password_hash VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `,
+  (err) => {
+    if (err) {
+      console.error("Users table creation error:", err.message);
+    }
+  }
+);
+
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const hash = crypto.scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${hash}`;
+}
+
+function verifyPassword(password, storedValue) {
+  if (!storedValue || !storedValue.includes(":")) {
+    return false;
+  }
+
+  const [salt, savedHash] = storedValue.split(":");
+  const hashBuffer = crypto.scryptSync(password, salt, 64);
+  const savedHashBuffer = Buffer.from(savedHash, "hex");
+
+  if (hashBuffer.length !== savedHashBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(hashBuffer, savedHashBuffer);
+}
+
 // ===========================
 // Test Route
 // ===========================
 app.get(["/", "/api"], (req, res) => {
   res.send("Backend is running successfully 🚀");
+});
+
+// ===========================
+// AUTH API
+// ===========================
+app.post(["/auth/register", "/api/auth/register"], (req, res) => {
+  const { name, email, password } = req.body;
+
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      success: false,
+      msg: "Name, email, and password are required"
+    });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({
+      success: false,
+      msg: "Password must be at least 6 characters"
+    });
+  }
+
+  const emailLower = email.trim().toLowerCase();
+
+  db.query("SELECT id FROM users WHERE email = ?", [emailLower], (checkErr, users) => {
+    if (checkErr) {
+      console.error("Register read error:", checkErr.message);
+      return res.status(500).json({
+        success: false,
+        msg: "Database Error"
+      });
+    }
+
+    if (users.length > 0) {
+      return res.status(409).json({
+        success: false,
+        msg: "Email already registered"
+      });
+    }
+
+    const passwordHash = hashPassword(password);
+    const sql = "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)";
+
+    db.query(sql, [name.trim(), emailLower, passwordHash], (insertErr) => {
+      if (insertErr) {
+        console.error("Register insert error:", insertErr.message);
+        return res.status(500).json({
+          success: false,
+          msg: "Database Error"
+        });
+      }
+
+      return res.status(201).json({
+        success: true,
+        msg: "Account created successfully"
+      });
+    });
+  });
+});
+
+app.post(["/auth/login", "/api/auth/login"], (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      msg: "Email and password are required"
+    });
+  }
+
+  const emailLower = email.trim().toLowerCase();
+
+  db.query(
+    "SELECT id, name, email, password_hash FROM users WHERE email = ? LIMIT 1",
+    [emailLower],
+    (err, users) => {
+      if (err) {
+        console.error("Login read error:", err.message);
+        return res.status(500).json({
+          success: false,
+          msg: "Database Error"
+        });
+      }
+
+      if (!users.length) {
+        return res.status(401).json({
+          success: false,
+          msg: "Invalid email or password"
+        });
+      }
+
+      const user = users[0];
+      const isValid = verifyPassword(password, user.password_hash);
+
+      if (!isValid) {
+        return res.status(401).json({
+          success: false,
+          msg: "Invalid email or password"
+        });
+      }
+
+      return res.json({
+        success: true,
+        msg: "Login successful",
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email
+        }
+      });
+    }
+  );
 });
 
 // ===========================

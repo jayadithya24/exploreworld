@@ -105,19 +105,47 @@ function setupLoginForm() {
   const form = document.getElementById("loginForm");
   if (!form) return;
 
-  form.addEventListener("submit", function (event) {
+  form.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     const email = document.getElementById("loginEmail")?.value.trim();
     const password = document.getElementById("loginPassword")?.value.trim();
+    const submitButton = form.querySelector('button[type="submit"]');
 
     if (!email || !password) {
       alert("Please enter your email and password.");
       return;
     }
 
-    setLoggedIn(true);
-    window.location.replace("index.html");
+    try {
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+
+      const response = await fetch(`${API_BASE}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        alert(data.msg || "Login failed. Please check your credentials.");
+        return;
+      }
+
+      setLoggedIn(true);
+      window.location.replace("index.html");
+    } catch (error) {
+      alert("Unable to login right now. Please try again.");
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+    }
   });
 }
 
@@ -125,13 +153,16 @@ function setupRegisterForm() {
   const form = document.getElementById("registerForm");
   if (!form) return;
 
-  form.addEventListener("submit", function (event) {
+  form.addEventListener("submit", async function (event) {
     event.preventDefault();
 
+    const name = document.getElementById("registerName")?.value.trim();
+    const email = document.getElementById("registerEmail")?.value.trim();
     const password = document.getElementById("registerPassword")?.value;
     const confirmPassword = document.getElementById("confirmPassword")?.value;
+    const submitButton = form.querySelector('button[type="submit"]');
 
-    if (!password || !confirmPassword) {
+    if (!name || !email || !password || !confirmPassword) {
       alert("Please fill in all required fields.");
       return;
     }
@@ -141,8 +172,40 @@ function setupRegisterForm() {
       return;
     }
 
-    setLoggedIn(true);
-    window.location.replace("index.html");
+    if (password.length < 6) {
+      alert("Password must be at least 6 characters.");
+      return;
+    }
+
+    try {
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+
+      const response = await fetch(`${API_BASE}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, email, password })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        alert(data.msg || "Registration failed. Please try again.");
+        return;
+      }
+
+      alert("Account created successfully. Please login.");
+      window.location.replace("login.html");
+    } catch (error) {
+      alert("Unable to register right now. Please try again.");
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+    }
   });
 }
 
