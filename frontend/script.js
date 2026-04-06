@@ -1,4 +1,4 @@
-const API_BASE = "https://exploreworld-nj6x.onrender.com";
+const API_BASE = window.location.hostname === "localhost" ? "http://localhost:5000" : "/api";
 const AUTH_STORAGE_KEY = "exploreworldLoggedIn";
 const DESTINATIONS_CACHE_KEY = "exploreworldDestinationsCache";
 

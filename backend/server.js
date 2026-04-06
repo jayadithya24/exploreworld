@@ -36,14 +36,14 @@ db.getConnection((err, connection) => {
 // ===========================
 // Test Route
 // ===========================
-app.get("/", (req, res) => {
+app.get(["/", "/api"], (req, res) => {
   res.send("Backend is running successfully 🚀");
 });
 
 // ===========================
 // CONTACT FORM API
 // ===========================
-app.post("/contact", (req, res) => {
+app.post(["/contact", "/api/contact"], (req, res) => {
   const { name, email, message } = req.body;
 
   if (!name || !email || !message) {
@@ -79,7 +79,7 @@ app.post("/contact", (req, res) => {
 // ===========================
 
 // Get all destinations
-app.get("/destinations", (req, res) => {
+app.get(["/destinations", "/api/destinations"], (req, res) => {
   const sql = "SELECT * FROM destinations ORDER BY id DESC";
 
   db.query(sql, (err, results) => {
@@ -96,7 +96,7 @@ app.get("/destinations", (req, res) => {
 });
 
 // Add new destination
-app.post("/destinations", (req, res) => {
+app.post(["/destinations", "/api/destinations"], (req, res) => {
   const { name, country, description, image_url } = req.body;
 
   if (!name || !description || !image_url) {
@@ -132,6 +132,10 @@ app.post("/destinations", (req, res) => {
 // ===========================
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
+}
+
+module.exports = app;
