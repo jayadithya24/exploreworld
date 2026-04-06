@@ -112,6 +112,24 @@ app.get(["/", "/api"], (req, res) => {
   res.send("Backend is running successfully 🚀");
 });
 
+app.get(["/db-check", "/api/db-check"], (req, res) => {
+  queryWithReconnect("SELECT 1 AS ok", [], (err, rows) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        msg: "Database connection failed",
+        code: err.code || "UNKNOWN"
+      });
+    }
+
+    return res.json({
+      success: true,
+      msg: "Database connection successful",
+      result: rows?.[0] || null
+    });
+  });
+});
+
 // ===========================
 // AUTH API
 // ===========================
