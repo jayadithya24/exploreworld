@@ -15,54 +15,54 @@ app.use(express.json()); // bodyParser not needed
 // ===========================
 // MySQL Connection Pool (Better for Render)
 // ===========================
-function createDbPool() {
-  return mysql.createPool({
+function createDbConfig() {
+  return {
     host: process.env.DB_HOST,
     port: Number(process.env.DB_PORT || 3306),
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     ssl: shouldUseSsl ? { rejectUnauthorized: false } : undefined,
-    enableKeepAlive: true,
-    keepAliveInitialDelay: 0,
     connectTimeout: 10000,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-  });
-}
-
-let db = createDbPool();
-
-function recreateDbPool() {
-  try {
-    db.end(() => {});
-  } catch (error) {
-    // Ignore close errors while replacing broken pool.
-  }
-  db = createDbPool();
+    connectAttributes: {
+      program_name: "exploreworld"
+    }
+  };
 }
 
 function queryWithReconnect(sql, params, callback, hasRetried = false) {
-  db.query(sql, params, (err, results) => {
-    if (err && err.code === "PROTOCOL_CONNECTION_LOST" && !hasRetried) {
-      recreateDbPool();
-      return queryWithReconnect(sql, params, callback, true);
+  const connection = mysql.createConnection(createDbConfig());
+
+  connection.connect((connectErr) => {
+    if (connectErr) {
+      connection.destroy();
+
+      if (connectErr.code === "PROTOCOL_CONNECTION_LOST" && !hasRetried) {
+        return queryWithReconnect(sql, params, callback, true);
+      }
+
+      return callback(connectErr);
     }
 
-    return callback(err, results);
+    connection.query(sql, params, (err, results) => {
+      connection.end((endErr) => {
+        if (err) {
+          if (err.code === "PROTOCOL_CONNECTION_LOST" && !hasRetried) {
+            return queryWithReconnect(sql, params, callback, true);
+          }
+
+          return callback(err);
+        }
+
+        if (endErr) {
+          console.error("MySQL connection close error:", endErr.message);
+        }
+
+        return callback(null, results);
+      });
+    });
   });
 }
-
-// Test DB connection
-db.getConnection((err, connection) => {
-  if (err) {
-    console.error("❌ MySQL connection failed:", err.message);
-  } else {
-    console.log("✅ MySQL Connected Successfully!");
-    connection.release();
-  }
-});
 
 // Ensure users table exists for auth features.
 queryWithReconnect(
