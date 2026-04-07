@@ -1,4 +1,12 @@
-const API_BASE = window.location.hostname === "localhost" ? "http://localhost:5000" : "/api";
+const API_BASE = (() => {
+  const { hostname, port, protocol } = window.location;
+
+  if ((hostname === "localhost" || hostname === "127.0.0.1") && port !== "5000") {
+    return `${protocol}//${hostname}:5000`;
+  }
+
+  return "/api";
+})();
 const AUTH_STORAGE_KEY = "exploreworldLoggedIn";
 const DESTINATIONS_CACHE_KEY = "exploreworldDestinationsCache";
 
