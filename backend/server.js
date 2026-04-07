@@ -36,6 +36,12 @@ function queryWithReconnect(sql, params, callback, hasRetried = false) {
   connection.connect((connectErr) => {
     if (connectErr) {
       connection.destroy();
+      console.error("MySQL connect error:", {
+        code: connectErr.code,
+        errno: connectErr.errno,
+        sqlState: connectErr.sqlState,
+        message: connectErr.message
+      });
 
       if (connectErr.code === "PROTOCOL_CONNECTION_LOST" && !hasRetried) {
         return queryWithReconnect(sql, params, callback, true);
@@ -47,6 +53,13 @@ function queryWithReconnect(sql, params, callback, hasRetried = false) {
     connection.query(sql, params, (err, results) => {
       connection.end((endErr) => {
         if (err) {
+          console.error("MySQL query error:", {
+            code: err.code,
+            errno: err.errno,
+            sqlState: err.sqlState,
+            message: err.message
+          });
+
           if (err.code === "PROTOCOL_CONNECTION_LOST" && !hasRetried) {
             return queryWithReconnect(sql, params, callback, true);
           }
@@ -118,7 +131,10 @@ app.get(["/db-check", "/api/db-check"], (req, res) => {
       return res.status(500).json({
         success: false,
         msg: "Database connection failed",
-        code: err.code || "UNKNOWN"
+        code: err.code || "UNKNOWN",
+        errno: err.errno || null,
+        sqlState: err.sqlState || null,
+        detail: err.message || null
       });
     }
 
