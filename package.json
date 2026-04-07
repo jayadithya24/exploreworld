@@ -1,0 +1,13 @@
+{
+  "name": "exploreworld-netlify",
+  "private": true,
+  "version": "1.0.0",
+  "description": "ExploreWorld deployment dependencies for Netlify Functions",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mysql2": "^3.15.3",
+    "serverless-http": "^4.0.0"
+  }
+}

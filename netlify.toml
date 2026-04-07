@@ -1,14 +1,15 @@
 [build]
   publish = "frontend"
+  functions = "netlify/functions"
 
 [[redirects]]
   from = "/api"
-  to = "https://exploreworld-tkhr.vercel.app/api"
+  to = "/.netlify/functions/api"
   status = 200
   force = true
 
 [[redirects]]
   from = "/api/*"
-  to = "https://exploreworld-tkhr.vercel.app/api/:splat"
+  to = "/.netlify/functions/api/:splat"
   status = 200
   force = true

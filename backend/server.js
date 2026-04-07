@@ -336,8 +336,15 @@ app.post(["/destinations", "/api/destinations"], (req, res) => {
 // START SERVER
 // ===========================
 const PORT = process.env.PORT || 5000;
+const isServerlessEnvironment = Boolean(
+  process.env.VERCEL ||
+  process.env.NETLIFY ||
+  process.env.NETLIFY_DEV ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME ||
+  process.env.FUNCTIONS_EMULATOR
+);
 
-if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+if (!isServerlessEnvironment) {
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
   });
