@@ -1,8 +1,8 @@
 {
-  "name": "exploreworld-netlify",
+  "name": "exploreworld-vercel",
   "private": true,
   "version": "1.0.0",
-  "description": "ExploreWorld deployment dependencies for Netlify Functions",
+  "description": "ExploreWorld deployment dependencies for Vercel",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

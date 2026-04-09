@@ -354,8 +354,6 @@ app.post(["/destinations", "/api/destinations"], (req, res) => {
 const PORT = process.env.PORT || 5000;
 const isServerlessEnvironment = Boolean(
   process.env.VERCEL ||
-  process.env.NETLIFY ||
-  process.env.NETLIFY_DEV ||
   process.env.AWS_LAMBDA_FUNCTION_NAME ||
   process.env.FUNCTIONS_EMULATOR
 );
