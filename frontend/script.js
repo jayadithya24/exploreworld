@@ -121,7 +121,7 @@ function setupLoginForm() {
     const submitButton = form.querySelector('button[type="submit"]');
 
     if (!email || !password) {
-      alert("Please enter your email and password.");
+      showPopup("Please enter your email and password.", "error");
       return;
     }
 
@@ -141,14 +141,14 @@ function setupLoginForm() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        alert(data.msg || "Login failed. Please check your credentials.");
+        showPopup(data.msg || "Login failed. Please check your credentials.", "error");
         return;
       }
 
       setLoggedIn(true);
       window.location.replace("index.html");
     } catch (error) {
-      alert("Unable to login right now. Please try again.");
+      showPopup("Unable to login right now. Please try again.", "error");
     } finally {
       if (submitButton) {
         submitButton.disabled = false;
@@ -171,17 +171,17 @@ function setupRegisterForm() {
     const submitButton = form.querySelector('button[type="submit"]');
 
     if (!name || !email || !password || !confirmPassword) {
-      alert("Please fill in all required fields.");
+      showPopup("Please fill in all required fields.", "error");
       return;
     }
 
     if (password !== confirmPassword) {
-      alert("Password and confirm password must match.");
+      showPopup("Password and confirm password must match.", "error");
       return;
     }
 
     if (password.length < 6) {
-      alert("Password must be at least 6 characters.");
+      showPopup("Password must be at least 6 characters.", "error");
       return;
     }
 
@@ -201,14 +201,14 @@ function setupRegisterForm() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        alert(data.msg || "Registration failed. Please try again.");
+        showPopup(data.msg || "Registration failed. Please try again.", "error");
         return;
       }
 
-      alert("Account created successfully. Please login.");
+      showPopup("Account created successfully. Please login.", "success");
       window.location.replace("login.html");
     } catch (error) {
-      alert("Unable to register right now. Please try again.");
+      showPopup("Unable to register right now. Please try again.", "error");
     } finally {
       if (submitButton) {
         submitButton.disabled = false;
@@ -281,6 +281,34 @@ function showToast(message) {
   setTimeout(() => {
     toast.classList.remove("show");
   }, 3000);
+}
+
+// Custom popup function
+function showPopup(message, type = "info") {
+  let popup = document.getElementById("custom-popup");
+  if (!popup) {
+    popup = document.createElement("div");
+    popup.id = "custom-popup";
+    popup.style.position = "fixed";
+    popup.style.top = "40px";
+    popup.style.left = "50%";
+    popup.style.transform = "translateX(-50%)";
+    popup.style.background = type === "error" ? "#ff4d4f" : type === "success" ? "#52c41a" : "#1890ff";
+    popup.style.color = "#fff";
+    popup.style.padding = "16px 32px";
+    popup.style.borderRadius = "8px";
+    popup.style.boxShadow = "0 2px 8px rgba(0,0,0,0.15)";
+    popup.style.fontSize = "1.1rem";
+    popup.style.zIndex = 9999;
+    popup.style.opacity = 0;
+    popup.style.transition = "opacity 0.3s";
+    document.body.appendChild(popup);
+  }
+  popup.textContent = message;
+  popup.style.opacity = 1;
+  setTimeout(() => {
+    popup.style.opacity = 0;
+  }, 2500);
 }
 
 function renderDestinationCards(container, destinations) {

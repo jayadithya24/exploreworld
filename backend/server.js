@@ -1,100 +1,50 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const mysql = require("mysql2");
+const mongoose = require("mongoose");
 const crypto = require("crypto");
 
 const app = express();
 
-const shouldUseSsl = process.env.DB_SSL === "true";
-
 // Middlewares
 app.use(cors());
-app.use(express.json()); // bodyParser not needed
+app.use(express.json());
 
 // ===========================
-// MySQL Connection Pool (Better for Render)
+// MongoDB Connection
 // ===========================
-function createDbConfig() {
-  return {
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT || 3306),
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    ssl: shouldUseSsl ? { rejectUnauthorized: false } : undefined,
-    connectTimeout: 10000,
-    connectAttributes: {
-      program_name: "exploreworld"
-    }
-  };
-}
+const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/exploreworld";
+mongoose.connect(mongoUri)
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
-function queryWithReconnect(sql, params, callback, hasRetried = false) {
-  const connection = mysql.createConnection(createDbConfig());
+// ===========================
+// Mongoose Schemas & Models
+// ===========================
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password_hash: { type: String, required: true },
+  created_at: { type: Date, default: Date.now }
+});
+const User = mongoose.model("User", userSchema);
 
-  connection.connect((connectErr) => {
-    if (connectErr) {
-      connection.destroy();
-      console.error("MySQL connect error:", {
-        code: connectErr.code,
-        errno: connectErr.errno,
-        sqlState: connectErr.sqlState,
-        message: connectErr.message
-      });
+const contactSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  message: { type: String, required: true },
+  created_at: { type: Date, default: Date.now }
+});
+const ContactMessage = mongoose.model("ContactMessage", contactSchema);
 
-      if (connectErr.code === "PROTOCOL_CONNECTION_LOST" && !hasRetried) {
-        return queryWithReconnect(sql, params, callback, true);
-      }
-
-      return callback(connectErr);
-    }
-
-    connection.query(sql, params, (err, results) => {
-      connection.end((endErr) => {
-        if (err) {
-          console.error("MySQL query error:", {
-            code: err.code,
-            errno: err.errno,
-            sqlState: err.sqlState,
-            message: err.message
-          });
-
-          if (err.code === "PROTOCOL_CONNECTION_LOST" && !hasRetried) {
-            return queryWithReconnect(sql, params, callback, true);
-          }
-
-          return callback(err);
-        }
-
-        if (endErr) {
-          console.error("MySQL connection close error:", endErr.message);
-        }
-
-        return callback(null, results);
-      });
-    });
-  });
-}
-
-// Ensure users table exists for auth features.
-queryWithReconnect(
-  `
-    CREATE TABLE IF NOT EXISTS users (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      name VARCHAR(100) NOT NULL,
-      email VARCHAR(255) NOT NULL UNIQUE,
-      password_hash VARCHAR(255) NOT NULL,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `,
-  [],
-  (err) => {
-    if (err) {
-      console.error("Users table creation error:", err.message);
-    }
-  }
-);
+const destinationSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  country: { type: String },
+  description: { type: String, required: true },
+  image_url: { type: String, required: true },
+  created_at: { type: Date, default: Date.now }
+});
+const Destination = mongoose.model("Destination", destinationSchema);
 
 function hashPassword(password) {
   const salt = crypto.randomBytes(16).toString("hex");
@@ -125,31 +75,26 @@ app.get(["/", "/api"], (req, res) => {
   res.send("Backend is running successfully 🚀");
 });
 
-app.get(["/db-check", "/api/db-check"], (req, res) => {
-  queryWithReconnect("SELECT 1 AS ok", [], (err, rows) => {
-    if (err) {
-      return res.status(500).json({
-        success: false,
-        msg: "Database connection failed",
-        code: err.code || "UNKNOWN",
-        errno: err.errno || null,
-        sqlState: err.sqlState || null,
-        detail: err.message || null
-      });
-    }
-
+app.get(["/db-check", "/api/db-check"], async (req, res) => {
+  try {
+    await mongoose.connection.db.admin().ping();
     return res.json({
       success: true,
-      msg: "Database connection successful",
-      result: rows?.[0] || null
+      msg: "Database connection successful"
     });
-  });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      msg: "Database connection failed",
+      detail: err.message || null
+    });
+  }
 });
 
 // ===========================
 // AUTH API
 // ===========================
-app.post(["/auth/register", "/api/auth/register"], (req, res) => {
+app.post(["/auth/register", "/api/auth/register"], async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -167,18 +112,9 @@ app.post(["/auth/register", "/api/auth/register"], (req, res) => {
   }
 
   const emailLower = email.trim().toLowerCase();
-
-  queryWithReconnect("SELECT id FROM users WHERE email = ?", [emailLower], (checkErr, users) => {
-    if (checkErr) {
-      console.error("Register read error:", checkErr.message);
-      return res.status(500).json({
-        success: false,
-        msg: "Database Error",
-        code: checkErr.code || "UNKNOWN"
-      });
-    }
-
-    if (users.length > 0) {
+  try {
+    const existingUser = await User.findOne({ email: emailLower });
+    if (existingUser) {
       return res.status(409).json({
         success: false,
         msg: "Email already registered"
@@ -186,27 +122,22 @@ app.post(["/auth/register", "/api/auth/register"], (req, res) => {
     }
 
     const passwordHash = hashPassword(password);
-    const sql = "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)";
-
-    queryWithReconnect(sql, [name.trim(), emailLower, passwordHash], (insertErr) => {
-      if (insertErr) {
-        console.error("Register insert error:", insertErr.message);
-        return res.status(500).json({
-          success: false,
-          msg: "Database Error",
-          code: insertErr.code || "UNKNOWN"
-        });
-      }
-
-      return res.status(201).json({
-        success: true,
-        msg: "Account created successfully"
-      });
+    const user = new User({ name: name.trim(), email: emailLower, password_hash: passwordHash });
+    await user.save();
+    return res.status(201).json({
+      success: true,
+      msg: "Account created successfully"
     });
-  });
+  } catch (err) {
+    console.error("Register error:", err.message);
+    return res.status(500).json({
+      success: false,
+      msg: "Database Error"
+    });
+  }
 });
 
-app.post(["/auth/login", "/api/auth/login"], (req, res) => {
+app.post(["/auth/login", "/api/auth/login"], async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -217,54 +148,43 @@ app.post(["/auth/login", "/api/auth/login"], (req, res) => {
   }
 
   const emailLower = email.trim().toLowerCase();
-
-  queryWithReconnect(
-    "SELECT id, name, email, password_hash FROM users WHERE email = ? LIMIT 1",
-    [emailLower],
-    (err, users) => {
-      if (err) {
-        console.error("Login read error:", err.message);
-        return res.status(500).json({
-          success: false,
-          msg: "Database Error",
-          code: err.code || "UNKNOWN"
-        });
-      }
-
-      if (!users.length) {
-        return res.status(401).json({
-          success: false,
-          msg: "Invalid email or password"
-        });
-      }
-
-      const user = users[0];
-      const isValid = verifyPassword(password, user.password_hash);
-
-      if (!isValid) {
-        return res.status(401).json({
-          success: false,
-          msg: "Invalid email or password"
-        });
-      }
-
-      return res.json({
-        success: true,
-        msg: "Login successful",
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email
-        }
+  try {
+    const user = await User.findOne({ email: emailLower });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        msg: "Invalid email or password"
       });
     }
-  );
+    const isValid = verifyPassword(password, user.password_hash);
+    if (!isValid) {
+      return res.status(401).json({
+        success: false,
+        msg: "Invalid email or password"
+      });
+    }
+    return res.json({
+      success: true,
+      msg: "Login successful",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      }
+    });
+  } catch (err) {
+    console.error("Login error:", err.message);
+    return res.status(500).json({
+      success: false,
+      msg: "Database Error"
+    });
+  }
 });
 
 // ===========================
 // CONTACT FORM API
 // ===========================
-app.post(["/contact", "/api/contact"], (req, res) => {
+app.post(["/contact", "/api/contact"], async (req, res) => {
   const { name, email, message } = req.body;
 
   if (!name || !email || !message) {
@@ -274,25 +194,20 @@ app.post(["/contact", "/api/contact"], (req, res) => {
     });
   }
 
-  const sql = `
-    INSERT INTO contact_messages (name, email, message)
-    VALUES (?, ?, ?)
-  `;
-
-  queryWithReconnect(sql, [name, email, message], (err) => {
-    if (err) {
-      console.error("Insert Error:", err.message);
-      return res.status(500).json({
-        success: false,
-        msg: "Database Error"
-      });
-    }
-
+  try {
+    const contactMsg = new ContactMessage({ name, email, message });
+    await contactMsg.save();
     res.json({
       success: true,
       msg: "Message sent successfully!"
     });
-  });
+  } catch (err) {
+    console.error("Insert Error:", err.message);
+    return res.status(500).json({
+      success: false,
+      msg: "Database Error"
+    });
+  }
 });
 
 // ===========================
@@ -300,24 +215,21 @@ app.post(["/contact", "/api/contact"], (req, res) => {
 // ===========================
 
 // Get all destinations
-app.get(["/destinations", "/api/destinations"], (req, res) => {
-  const sql = "SELECT * FROM destinations ORDER BY id DESC";
-
-  queryWithReconnect(sql, [], (err, results) => {
-    if (err) {
-      console.error("Database Read Error:", err.message);
-      return res.status(500).json({
-        success: false,
-        msg: "Error fetching destinations"
-      });
-    }
-
+app.get(["/destinations", "/api/destinations"], async (req, res) => {
+  try {
+    const results = await Destination.find().sort({ created_at: -1 });
     res.json(results);
-  });
+  } catch (err) {
+    console.error("Database Read Error:", err.message);
+    return res.status(500).json({
+      success: false,
+      msg: "Error fetching destinations"
+    });
+  }
 });
 
 // Add new destination
-app.post(["/destinations", "/api/destinations"], (req, res) => {
+app.post(["/destinations", "/api/destinations"], async (req, res) => {
   const { name, country, description, image_url } = req.body;
 
   if (!name || !description || !image_url) {
@@ -327,25 +239,20 @@ app.post(["/destinations", "/api/destinations"], (req, res) => {
     });
   }
 
-  const sql = `
-    INSERT INTO destinations (name, country, description, image_url)
-    VALUES (?, ?, ?, ?)
-  `;
-
-  queryWithReconnect(sql, [name, country || null, description, image_url], (err) => {
-    if (err) {
-      console.error("Insert Destination Error:", err.message);
-      return res.status(500).json({
-        success: false,
-        msg: "Database Error"
-      });
-    }
-
+  try {
+    const dest = new Destination({ name, country, description, image_url });
+    await dest.save();
     res.json({
       success: true,
       msg: "Destination added successfully!"
     });
-  });
+  } catch (err) {
+    console.error("Insert Destination Error:", err.message);
+    return res.status(500).json({
+      success: false,
+      msg: "Database Error"
+    });
+  }
 });
 
 // ===========================

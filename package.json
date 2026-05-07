@@ -7,7 +7,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "mysql2": "^3.15.3",
+    "mongoose": "^9.6.1",
     "serverless-http": "^4.0.0"
   }
 }
