@@ -71,7 +71,7 @@ nav ul li a {
   font-weight: 500;
   padding: 0.5rem 1rem;
   border-radius: 5px;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 nav ul li a:hover,
@@ -1314,4 +1314,225 @@ padding:12px;
     border-radius: 14px;
     padding: 1.25rem;
   }
+}
+
+/* FINAL ENFORCED BOOKING FORM STYLE */
+.booking-section {
+  min-height: 70vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  background: linear-gradient(120deg, #e3f0ff 0%, #f9f9f9 100%) !important;
+  padding-top: 40px !important;
+}
+.booking-form {
+  max-width: 440px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  background: #fff !important;
+  padding: 40px 36px 32px 36px !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 32px rgba(24, 144, 255, 0.10), 0 1.5px 8px rgba(0,0,0,0.07) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 22px !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+.booking-form .form-group {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 7px !important;
+}
+.booking-form label {
+  font-weight: 600 !important;
+  color: #1a2a3a !important;
+  margin-bottom: 2px !important;
+  letter-spacing: 0.01em !important;
+}
+.booking-form input,
+.booking-form textarea {
+  padding: 12px 14px !important;
+  border: 1.5px solid #dbeafe !important;
+  border-radius: 7px !important;
+  font-size: 1.07rem !important;
+  background: #f4f8ff !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+  box-shadow: 0 1px 2px rgba(24,144,255,0.03) !important;
+}
+.booking-form input:focus,
+.booking-form textarea:focus {
+  outline: none !important;
+  border-color: #1890ff !important;
+  background: #fff !important;
+  box-shadow: 0 0 0 2px #bae7ff44 !important;
+}
+.booking-form textarea {
+  min-height: 60px !important;
+  resize: vertical !important;
+}
+.booking-form button[type="submit"],
+.btn-primary {
+  background: linear-gradient(90deg, #1890ff 0%, #005bea 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 14px 0 !important;
+  border-radius: 7px !important;
+  font-size: 1.13rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  margin-top: 10px !important;
+  box-shadow: 0 2px 8px rgba(24,144,255,0.10) !important;
+  letter-spacing: 0.03em !important;
+  transition: background 0.2s, box-shadow 0.2s !important;
+}
+.booking-form button[type="submit"]:hover,
+.btn-primary:hover {
+  background: linear-gradient(90deg, #005bea 0%, #1890ff 100%) !important;
+  box-shadow: 0 4px 16px rgba(24,144,255,0.13) !important;
+}
+.booking-form input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.5) !important;
+}
+.booking-form input[type="number"]::-webkit-inner-spin-button,
+.booking-form input[type="number"]::-webkit-outer-spin-button {
+  opacity: 0.7 !important;
+}
+.booking-form input[type="number"] {
+  -moz-appearance: textfield !important;
+}
+@media (max-width: 700px) {
+  .booking-form {
+    padding: 18px 6vw 14px 6vw !important;
+    max-width: 98vw !important;
+  }
+}
+.booking-form-title {
+  text-align: center !important;
+  font-size: 2.1rem !important;
+  font-weight: 800 !important;
+  color: #1a2a3a !important;
+  margin-bottom: 18px !important;
+  letter-spacing: 0.01em !important;
+}
+.booking-form .form-group input:invalid {
+  border-color: #ff7875 !important;
+}
+
+/* Order Confirmation Page Styles */
+.confirmation-section {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(120deg, #e3f0ff 0%, #f9f9f9 100%);
+  padding-top: 60px;
+}
+.confirmation-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1a2a3a;
+  margin-bottom: 18px;
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+.confirmation-message {
+  font-size: 1.2rem;
+  color: #34495e;
+  margin-bottom: 32px;
+  text-align: center;
+  line-height: 1.7;
+}
+.confirmation-btn {
+  display: inline-block;
+  background: linear-gradient(90deg, #1890ff 0%, #005bea 100%);
+  color: #fff;
+  border: none;
+  padding: 14px 36px;
+  border-radius: 7px;
+  font-size: 1.13rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(24,144,255,0.10);
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.confirmation-btn:hover {
+  background: linear-gradient(90deg, #005bea 0%, #1890ff 100%);
+  box-shadow: 0 4px 16px rgba(24,144,255,0.13);
+}
+
+/* Transaction Details Card */
+.transaction-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(24,144,255,0.10), 0 1.5px 8px rgba(0,0,0,0.07);
+  padding: 28px 32px 18px 32px;
+  margin: 0 auto 32px auto;
+  max-width: 370px;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 32px;
+}
+.transaction-card h3 {
+  margin-top: 0;
+  margin-bottom: 18px;
+  font-size: 1.25rem;
+  color: #005bea;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.transaction-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0;
+  font-size: 1.07rem;
+  border-bottom: 1px solid #f0f4fa;
+}
+.transaction-row:last-child {
+  border-bottom: none;
+}
+.paid-status {
+  color: #52c41a;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+/* Transaction Details Card (Booking Page) */
+.transaction-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(24,144,255,0.10), 0 1.5px 8px rgba(0,0,0,0.07);
+  padding: 28px 32px 18px 32px;
+  margin: 0 auto 32px auto;
+  max-width: 370px;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 32px;
+}
+.transaction-card h3 {
+  margin-top: 0;
+  margin-bottom: 18px;
+  font-size: 1.25rem;
+  color: #005bea;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.transaction-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 7px 0;
+  font-size: 1.07rem;
+  border-bottom: 1px solid #f0f4fa;
+}
+.transaction-row:last-child {
+  border-bottom: none;
+}
+.paid-status {
+  color: #52c41a;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }

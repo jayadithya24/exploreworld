@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Booking Confirmed - ExploreWorld</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">ExploreWorld</div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="destinations.html">Destinations</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="packages.html">Packages</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><button type="button" class="nav-logout-btn" data-logout-button>Logout</button></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <section class="confirmation-section">
+      <h2 class="confirmation-title">Booking Confirmed!</h2>
+      <p class="confirmation-message">Thank you for booking your trip with ExploreWorld.<br>Your order has been received and a confirmation email will be sent to you soon.</p>
+      <!-- Payment Method Selection -->
+     
+      <div id="transaction-details" class="transaction-card">
+        <h3>Transaction Details</h3>
+        <div class="transaction-row"><span>Transaction ID:</span> <span>TXN1234567890</span></div>
+        <div class="transaction-row"><span>Payment Method:</span> <span id="txn-method">Credit Card (**** 4242)</span></div>
+        <div class="transaction-row"><span>Amount Paid:</span> <span>₹6,299</span></div>
+        <div class="transaction-row"><span>Date:</span> <span>07 May 2026</span></div>
+        <div class="transaction-row"><span>Status:</span> <span class="paid-status">Paid</span></div>
+      </div>
+      <a href="index.html" class="btn-primary confirmation-btn">Back to Home</a>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2026 ExploreWorld. All rights reserved.</p>
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>

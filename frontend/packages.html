@@ -42,6 +42,7 @@
               <li>City tour and airport transfer</li>
               <li>Best for quick weekend trips</li>
             </ul>
+            <button class="btn-primary book-now-btn" data-package="City Escape">Book Now</button>
           </div>
         </article>
 
@@ -56,6 +57,7 @@
               <li>Beach activities and local guide</li>
               <li>Great for couples and friends</li>
             </ul>
+            <button class="btn-primary book-now-btn" data-package="Coastal Holiday">Book Now</button>
           </div>
         </article>
 
@@ -70,6 +72,7 @@
               <li>Private driver and custom itinerary</li>
               <li>Ideal for a special holiday</li>
             </ul>
+            <button class="btn-primary book-now-btn" data-package="Luxury Adventure">Book Now</button>
           </div>
         </article>
 
@@ -84,6 +87,7 @@
               <li>Hiking tours and nature walks</li>
               <li>Perfect for adventure seekers</li>
             </ul>
+            <button class="btn-primary book-now-btn" data-package="Mountain Escape">Book Now</button>
           </div>
         </article>
 
@@ -98,6 +102,7 @@
               <li>Museum visits and local workshops</li>
               <li>Learn traditions and local crafts</li>
             </ul>
+            <button class="btn-primary book-now-btn" data-package="Cultural Tour">Book Now</button>
           </div>
         </article>
 
@@ -112,6 +117,7 @@
               <li>Theme parks and kid-friendly activities</li>
               <li>Great memories for the whole family</li>
             </ul>
+            <button class="btn-primary book-now-btn" data-package="Family Vacation">Book Now</button>
           </div>
         </article>
       </div>
@@ -123,5 +129,16 @@
   </footer>
 
   <script src="script.js"></script>
+<script>
+  // Add event listeners to all Book Now buttons
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('.book-now-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        const pkg = btn.getAttribute('data-package');
+        window.location.href = `booking.html?package=${encodeURIComponent(pkg)}`;
+      });
+    });
+  });
+</script>
 </body>
 </html>

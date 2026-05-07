@@ -146,7 +146,10 @@ function setupLoginForm() {
       }
 
       setLoggedIn(true);
-      window.location.replace("index.html");
+      showPopup("Login successful! Welcome back.", "success");
+      setTimeout(() => {
+        window.location.replace("index.html");
+      }, 1200);
     } catch (error) {
       showPopup("Unable to login right now. Please try again.", "error");
     } finally {
@@ -206,7 +209,9 @@ function setupRegisterForm() {
       }
 
       showPopup("Account created successfully. Please login.", "success");
-      window.location.replace("login.html");
+      setTimeout(() => {
+        window.location.replace("login.html");
+      }, 1200);
     } catch (error) {
       showPopup("Unable to register right now. Please try again.", "error");
     } finally {
@@ -400,4 +405,59 @@ function loadDestinations() {
 // Run only on destinations page
 if (window.location.pathname.includes("destinations")) {
   loadDestinations();
+}
+
+// Payment method selection logic for booking.html
+if (getCurrentPage() === "booking.html") {
+  const paymentRadios = document.querySelectorAll('input[name="paymentMethod"]');
+  const txnMethod = document.querySelector('.transaction-card .transaction-row span:last-child');
+  if (paymentRadios && txnMethod) {
+    paymentRadios.forEach(function(radio) {
+      radio.addEventListener('change', function() {
+        if (radio.checked) {
+          if (radio.value === "Credit Card") {
+            txnMethod.textContent = "Credit Card (**** 4242)";
+          } else if (radio.value === "UPI") {
+            txnMethod.textContent = "UPI (user@upi)";
+          } else if (radio.value === "Net Banking") {
+            txnMethod.textContent = "Net Banking (HDFC)";
+          } else {
+            txnMethod.textContent = radio.value;
+          }
+        }
+      });
+    });
+  }
+}
+
+// Payment method selection logic for order-confirmation.html
+if (getCurrentPage() === "order-confirmation.html") {
+  const paymentForm = document.getElementById("payment-method-form");
+  const txnDetails = document.getElementById("transaction-details");
+  const txnMethod = document.getElementById("txn-method");
+  const backHomeBtn = document.getElementById("back-home-btn");
+
+  if (paymentForm && txnDetails && txnMethod && backHomeBtn) {
+    paymentForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const selected = paymentForm.querySelector('input[name="paymentMethod"]:checked');
+      let methodText = "";
+      if (selected) {
+        if (selected.value === "Credit Card") {
+          methodText = "Credit Card (**** 4242)";
+        } else if (selected.value === "UPI") {
+          methodText = "UPI (user@upi)";
+        } else if (selected.value === "Net Banking") {
+          methodText = "Net Banking (HDFC)";
+        } else {
+          methodText = selected.value;
+        }
+        txnMethod.textContent = methodText;
+      }
+      paymentForm.style.display = "none";
+      txnDetails.style.display = "block";
+      backHomeBtn.style.display = "inline-block";
+      showPopup("Payment successful!", "success");
+    });
+  }
 }

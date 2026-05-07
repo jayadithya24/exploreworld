@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Book Your Package - ExploreWorld</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <div class="logo">ExploreWorld</div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="destinations.html">Destinations</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="packages.html">Packages</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><button type="button" class="nav-logout-btn" data-logout-button>Logout</button></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <section class="booking-section">
+      <h2 class="booking-form-title">Book Your Package</h2>
+      <form id="bookingForm" class="booking-form">
+        <input type="hidden" id="packageName" name="packageName" />
+        <div class="form-group">
+          <label for="customerName">Full Name</label>
+          <input type="text" id="customerName" name="customerName" required />
+        </div>
+        <div class="form-group">
+          <label for="customerEmail">Email Address</label>
+          <input type="email" id="customerEmail" name="customerEmail" required />
+        </div>
+        <div class="form-group">
+          <label for="customerPhone">Phone Number</label>
+          <input type="tel" id="customerPhone" name="customerPhone" required />
+        </div>
+        <div class="form-group">
+          <label for="travelers">Number of Travelers</label>
+          <input type="number" id="travelers" name="travelers" min="1" required />
+        </div>
+        <div class="form-group">
+          <label for="startDate">Start Date</label>
+          <input type="date" id="startDate" name="startDate" required />
+        </div>
+        <div class="form-group">
+          <label for="specialRequests">Special Requests</label>
+          <textarea id="specialRequests" name="specialRequests" rows="3"></textarea>
+        </div>
+        <!-- Payment Method Selection -->
+        <div class="form-group">
+          <label style="font-weight:600; font-size:1.13rem; margin-bottom:8px; display:block;">Select Payment Method</label>
+          <label class="payment-option">
+            <input type="radio" name="paymentMethod" value="Credit Card" checked />
+            Credit Card
+          </label>
+          <label class="payment-option">
+            <input type="radio" name="paymentMethod" value="UPI" />
+            UPI
+          </label>
+          <label class="payment-option">
+            <input type="radio" name="paymentMethod" value="Net Banking" />
+            Net Banking
+          </label>
+        </div>
+        <button type="submit" class="btn-primary">Book Now</button>
+      </form>
+      <div class="transaction-card" style="margin-top:32px;">
+        <h3>Transaction Details</h3>
+        <div class="transaction-row"><span>Package:</span> <span id="txn-package">Coastal Holiday</span></div>
+        <div class="transaction-row"><span>Base Price:</span> <span>₹4,699</span></div>
+        <div class="transaction-row"><span>Taxes & Fees:</span> <span>₹300</span></div>
+        <div class="transaction-row"><span>Total Amount:</span> <span>₹4,999</span></div>
+        <div class="transaction-row"><span>Payment Method:</span> <span>Credit Card / UPI / Net Banking</span></div>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2026 ExploreWorld. All rights reserved.</p>
+  </footer>
+  <script src="script.js"></script>
+  <script>
+    // Pre-fill package name from query string
+    const params = new URLSearchParams(window.location.search);
+    const pkg = params.get('package');
+    if (pkg) {
+      document.getElementById('packageName').value = pkg;
+      var txnPkg = document.getElementById('txn-package');
+      if (txnPkg) txnPkg.textContent = pkg;
+    }
+
+    // Handle booking form submission
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      // You can add AJAX here to send booking to backend if needed
+      showPopup('Booking successful! Redirecting to confirmation...', 'success');
+      setTimeout(() => {
+        window.location.href = 'order-confirmation.html';
+      }, 1200);
+    });
+  </script>
+</body>
+</html>
