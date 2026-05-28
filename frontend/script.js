@@ -1,6 +1,11 @@
 const API_BASE = (() => {
   const { hostname, port, protocol } = window.location;
 
+  // Use your Render backend URL in production
+  if (hostname.endsWith("vercel.app")) {
+    return "https://YOUR-RENDER-BACKEND-URL";
+  }
+
   if ((hostname === "localhost" || hostname === "127.0.0.1") && port !== "5000") {
     return `${protocol}//${hostname}:5000`;
   }
